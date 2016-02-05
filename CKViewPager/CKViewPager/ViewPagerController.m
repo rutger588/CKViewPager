@@ -6,6 +6,12 @@
 //  Copyright (c) 2015 Lucas Oceano Martins. All rights reserved.
 //
 
+/**
+ * 2016.2.5 :  1. 修复快速滑动引起的内容页不正确BUG
+ *
+ *
+ */
+
 #import "ViewPagerController.h"
 
 #pragma mark - Constants and macros
@@ -357,7 +363,9 @@ static const BOOL kFixLatterTabsPositions = NO;
 	self.activeTabIndex = index;
 
 	// Set activeContentIndex
-	self.activeContentIndex = index;
+    // Add by Yanci
+    // Fix:修复快速滑动引起的内容页不正确BUG
+	/**self.activeContentIndex = index;**/
 
 	// Inform delegate about the change
 	if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:)]) {
@@ -504,8 +512,15 @@ static const BOOL kFixLatterTabsPositions = NO;
 	self.contents = [NSMutableArray arrayWithCapacity:self.tabCount];
 	for (NSUInteger i = 0; i < self.tabCount; i++) {
 		[self.contents addObject:[NSNull null]];
-	}
+    }
 
+    // Add by yanci
+    // Fix: 修复快速滑动引起的内容页不正确BUG
+    for (NSUInteger i = 0; i < self.tabCount; i++) {
+        [self viewControllerAtIndex:i];
+    }
+    
+    
 	// Add tabsView
 	self.tabsView = (UIScrollView *) [self.view viewWithTag:kTabViewTag];
 
@@ -587,8 +602,14 @@ static const BOOL kFixLatterTabsPositions = NO;
 
 	// Select starting tab
 	NSUInteger index = self.startFromSecondTab ? 1 : 0;
-	[self selectTabAtIndex:index didSwipe:YES];
-
+	/**[self selectTabAtIndex:index didSwipe:YES];**/
+    // Add By Yanci
+    // Fix : 修复快速滑动引起的内容页不正确
+    [_pageViewController setViewControllers:@[_contents.firstObject]
+                                  direction:UIPageViewControllerNavigationDirectionForward
+                                             animated:NO
+                                 completion:nil];
+    
 	CGRect rect = [self tabViewAtIndex:self.activeContentIndex].frame;
 	rect.origin.y = rect.size.height - self.indicatorHeight;
 	rect.size.height = self.indicatorHeight;
