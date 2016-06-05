@@ -372,12 +372,12 @@ static const BOOL kFixLatterTabsPositions = NO;
 	// Set activeContentIndex
     // Add by Yanci
     // Fix:修复快速滑动引起的内容页不正确BUG
-	/**self.activeContentIndex = index;**/
-    _activeContentIndex = index;
-    [_pageViewController setViewControllers:@[_contents[index]]
-                                  direction:UIPageViewControllerNavigationDirectionForward
-                                   animated:true completion:nil]
-    ;
+	self.activeContentIndex = index;
+//    _activeContentIndex = index;
+//    [_pageViewController setViewControllers:@[_contents[index]]
+//                                  direction:UIPageViewControllerNavigationDirectionForward
+//                                   animated:true completion:nil]
+//    ;
     
 	// Inform delegate about the change
 	if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:)]) {
@@ -531,11 +531,11 @@ static const BOOL kFixLatterTabsPositions = NO;
     }
     
     
-    // Add by yanci
-    // Fix: 修复快速滑动引起的内容页不正确BUG
-    for (NSUInteger i = 0; i < self.tabCount; i++) {
-        [self viewControllerAtIndex:i];
-    }
+//    // Add by yanci
+//    // Fix: 修复快速滑动引起的内容页不正确BUG
+//    for (NSUInteger i = 0; i < self.tabCount; i++) {
+//        [self viewControllerAtIndex:i];
+//    }
     
     // Add tabsView
     self.tabsView = (UIScrollView *) [self.view viewWithTag:kTabViewTag];
@@ -742,6 +742,11 @@ static const BOOL kFixLatterTabsPositions = NO;
 
 - (void)pageViewController:(UIPageViewController *)pageViewController didFinishAnimating:(BOOL)finished previousViewControllers:(NSArray *)previousViewControllers transitionCompleted:(BOOL)completed
 {
+    
+    if (!completed) {
+        return;
+    }
+    
     UIViewController *viewController = self.pageViewController.viewControllers[0];
     
     // Select tab
@@ -760,7 +765,7 @@ static const BOOL kFixLatterTabsPositions = NO;
     }
     UIView *tabView = [self tabViewAtIndex:self.activeTabIndex];
     
-#if 0  /*! Conflict with setTabAtIndex */
+ 
     if ([self isAnimatingToTab]) {
         
         // Get the related tab view position
@@ -790,7 +795,7 @@ static const BOOL kFixLatterTabsPositions = NO;
         [self.tabsView scrollRectToVisible:frame animated:NO];
     }
     
-#endif
+ 
     __block CGFloat newX;
     __block CGRect rect = tabView.frame;
     void (^updateIndicator)() = ^void() {
