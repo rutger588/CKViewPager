@@ -168,7 +168,9 @@ static const BOOL kFixLatterTabsPositions = NO;
     //if Tap is not selected Tab(new Tab)
     if (self.activeTabIndex != index) {
         // Select the tab
+        self.animatingToTab = YES;
         [self selectTabAtIndex:index didSwipe:NO];
+        self.animatingToTab = NO;
     }
 }
 
@@ -347,14 +349,20 @@ static const BOOL kFixLatterTabsPositions = NO;
 
 - (void)selectTabAtIndex:(NSUInteger)index didSwipe:(BOOL)didSwipe
 {
-//<<<<<<< HEAD
 	if (index >= self.tabCount) {
 		return;
 	}
 
 	self.didTapOnTabView = !didSwipe;
+ 
+    /*! 如果用户同时点击TabView以及手势滑动则直接返回*/
+    if (self.didTapOnTabView
+        &&  ((UIScrollView *) self.pageViewController.view.subviews[0]).tracking) {
+        return;
+    }
+    
+    
 	self.animatingToTab = YES;
-
 	// Keep a reference to previousIndex in case it is needed for the delegate
 	NSUInteger previousIndex = self.activeTabIndex;
 
@@ -365,6 +373,7 @@ static const BOOL kFixLatterTabsPositions = NO;
     // Add by Yanci
     // Fix:修复快速滑动引起的内容页不正确BUG
 	/**self.activeContentIndex = index;**/
+    _activeContentIndex = index;
     [_pageViewController setViewControllers:@[_contents[index]]
                                   direction:UIPageViewControllerNavigationDirectionForward
                                    animated:true completion:nil]
@@ -380,35 +389,6 @@ static const BOOL kFixLatterTabsPositions = NO;
 	else if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:fromIndex:didSwipe:)]) {
 		[self.delegate viewPager:self didChangeTabToIndex:self.activeTabIndex fromIndex:previousIndex didSwipe:didSwipe];
 	}
-//=======
-//    if (index >= self.tabCount) {
-//        return;
-//    }
-//    
-//    
-//    self.didTapOnTabView = !didSwipe;
-//    self.animatingToTab = YES;
-//    
-//    // Keep a reference to previousIndex in case it is needed for the delegate
-//    NSUInteger previousIndex = self.activeTabIndex;
-//    
-//    // Set activeTabIndex
-//    self.activeTabIndex = index;
-//    
-//    // Set activeContentIndex
-//    self.activeContentIndex = index;
-//    
-//    // Inform delegate about the change
-//    if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:)]) {
-//        [self.delegate viewPager:self didChangeTabToIndex:self.activeTabIndex];
-//    }
-//    else if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:fromIndex:)]) {
-//        [self.delegate viewPager:self didChangeTabToIndex:self.activeTabIndex fromIndex:previousIndex];
-//    }
-//    else if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:fromIndex:didSwipe:)]) {
-//        [self.delegate viewPager:self didChangeTabToIndex:self.activeTabIndex fromIndex:previousIndex didSwipe:didSwipe];
-//    }
-//>>>>>>> lucoceano/master
 }
 
 
@@ -518,7 +498,7 @@ static const BOOL kFixLatterTabsPositions = NO;
     self.pageViewController.dataSource = self;
     self.pageViewController.delegate = self;
     
-    self.animatingToTab = NO;
+    self.animatingToTab = YES;
     self.defaultSetupDone = NO;
     self.shouldShowDivider = NO;
 }
@@ -526,135 +506,6 @@ static const BOOL kFixLatterTabsPositions = NO;
 
 - (void)defaultSetup
 {
-//<<<<<<< HEAD
-//	// Empty tabs and contents
-//	for (UIView *tabView in self.tabs) {
-//		[tabView removeFromSuperview];
-//	}
-//	self.tabsView.contentSize = CGSizeZero;
-//
-//	[self.tabs removeAllObjects];
-//	[self.contents removeAllObjects];
-//
-//	// Get tabCount from dataSource
-//	self.tabCount = [self.dataSource numberOfTabsForViewPager:self];
-//
-//	// Populate arrays with [NSNull null];
-//	self.tabs = [NSMutableArray arrayWithCapacity:self.tabCount];
-//	for (NSUInteger i = 0; i < self.tabCount; i++) {
-//		[self.tabs addObject:[NSNull null]];
-//	}
-//
-//	self.contents = [NSMutableArray arrayWithCapacity:self.tabCount];
-//	for (NSUInteger i = 0; i < self.tabCount; i++) {
-//		[self.contents addObject:[NSNull null]];
-//    }
-//
-//    // Add by yanci
-//    // Fix: 修复快速滑动引起的内容页不正确BUG
-//    for (NSUInteger i = 0; i < self.tabCount; i++) {
-//        [self viewControllerAtIndex:i];
-//    }
-//    
-//    
-//	// Add tabsView
-//	self.tabsView = (UIScrollView *) [self.view viewWithTag:kTabViewTag];
-//
-//	if (!self.tabsView) {
-//
-//		self.tabsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.view.frame), self.tabHeight)];
-//		self.tabsView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-//		self.tabsView.backgroundColor = self.tabsViewBackgroundColor;
-//		self.tabsView.scrollsToTop = NO;
-//		self.tabsView.showsHorizontalScrollIndicator = NO;
-//		self.tabsView.showsVerticalScrollIndicator = NO;
-//		self.tabsView.tag = kTabViewTag;
-//
-//		[self.view insertSubview:self.tabsView atIndex:0];
-//
-//		self.underlineStroke = [UIView new];
-//		[self.tabsView addSubview:self.underlineStroke];
-//	}
-//
-//	// Add tab views to _tabsView
-//	CGFloat contentSizeWidth = 0;
-//
-//	// Give the standard offset if fixFormerTabsPositions is provided as YES
-//	if (self.fixFormerTabsPositions) {
-//
-//		// And if the centerCurrentTab is provided as YES fine tune the offset according to it
-//		if (self.centerCurrentTab) {
-//			contentSizeWidth = (CGRectGetWidth(self.tabsView.frame) - self.tabWidth) / 2.0f;
-//		} else {
-//			contentSizeWidth = self.tabOffset;
-//		}
-//	}
-//
-//	for (NSUInteger i = 0; i < self.tabCount; i++) {
-//
-//		UIView *tabView = [self tabViewAtIndex:i];
-//		CGRect frame = tabView.frame;
-//		frame.origin.x = contentSizeWidth;
-//		frame.size.width = self.tabWidth;
-//		tabView.frame = frame;
-//
-//		[self.tabsView addSubview:tabView];
-//
-//		if(i < self.tabCount -1) {
-//			contentSizeWidth += CGRectGetWidth(tabView.frame) + self.padding;
-//		}
-//
-//		// To capture tap events
-//		UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
-//		[tabView addGestureRecognizer:tapGestureRecognizer];
-//	}
-//
-//	// Extend contentSizeWidth if fixLatterTabsPositions is provided YES
-//	if (self.fixLatterTabsPositions) {
-//
-//		// And if the centerCurrentTab is provided as YES fine tune the content size according to it
-//		if (self.centerCurrentTab) {
-//			contentSizeWidth += (CGRectGetWidth(self.tabsView.frame) - self.tabWidth) / 2.0;
-//		} else {
-//			contentSizeWidth += CGRectGetWidth(self.tabsView.frame) - self.tabWidth - self.tabOffset;
-//		}
-//	}
-//
-//	self.tabsView.contentSize = CGSizeMake(contentSizeWidth, self.tabHeight);
-//
-//	// Add contentView
-//	self.contentView = [self.view viewWithTag:kContentViewTag];
-//
-//	if (!self.contentView) {
-//
-//		self.contentView = self.pageViewController.view;
-//		self.contentView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-//		self.contentView.backgroundColor = self.contentViewBackgroundColor;
-//		self.contentView.bounds = self.view.bounds;
-//		self.contentView.tag = kContentViewTag;
-//
-//		[self.view insertSubview:self.contentView atIndex:0];
-//	}
-//
-//	// Select starting tab
-//	NSUInteger index = self.startFromSecondTab ? 1 : 0;
-//	/**[self selectTabAtIndex:index didSwipe:YES];**/
-//    // Add By Yanci
-//    // Fix : 修复快速滑动引起的内容页不正确
-//    [_pageViewController setViewControllers:@[_contents.firstObject]
-//                                  direction:UIPageViewControllerNavigationDirectionForward
-//                                             animated:NO
-//                                 completion:nil];
-//    
-//	CGRect rect = [self tabViewAtIndex:self.activeContentIndex].frame;
-//	rect.origin.y = rect.size.height - self.indicatorHeight;
-//	rect.size.height = self.indicatorHeight;
-//	self.underlineStroke.frame = rect;
-//	self.underlineStroke.backgroundColor = self.indicatorColor;
-//
-//	// Set setup done
-//	self.defaultSetupDone = YES;
-//=======
     // Empty tabs and contents
     for (UIView *tabView in self.tabs) {
         [tabView removeFromSuperview];
@@ -685,7 +536,6 @@ static const BOOL kFixLatterTabsPositions = NO;
     for (NSUInteger i = 0; i < self.tabCount; i++) {
         [self viewControllerAtIndex:i];
     }
-    
     
     // Add tabsView
     self.tabsView = (UIScrollView *) [self.view viewWithTag:kTabViewTag];
@@ -786,13 +636,7 @@ static const BOOL kFixLatterTabsPositions = NO;
     
     // Select starting tab
     NSUInteger index = self.startFromSecondTab ? 1 : 0;
-	/**[self selectTabAtIndex:index didSwipe:YES];**/
-    // Add By Yanci
-    // Fix : 修复快速滑动引起的内容页不正确
-    [_pageViewController setViewControllers:@[_contents.firstObject]
-                                  direction:UIPageViewControllerNavigationDirectionForward
-                                             animated:NO
-                                 completion:nil];
+	[self selectTabAtIndex:index didSwipe:YES];
     
     CGRect rect = [self tabViewAtIndex:self.activeContentIndex].frame;
     rect.origin.y = rect.size.height - self.indicatorHeight;
@@ -804,7 +648,6 @@ static const BOOL kFixLatterTabsPositions = NO;
     
     // Set setup done
     self.defaultSetupDone = YES;
-//>>>>>>> lucoceano/master
 }
 
 
@@ -917,7 +760,8 @@ static const BOOL kFixLatterTabsPositions = NO;
     }
     UIView *tabView = [self tabViewAtIndex:self.activeTabIndex];
     
-    if (![self isAnimatingToTab]) {
+#if 0  /*! Conflict with setTabAtIndex */
+    if ([self isAnimatingToTab]) {
         
         // Get the related tab view position
         CGRect frame = tabView.frame;
@@ -946,6 +790,7 @@ static const BOOL kFixLatterTabsPositions = NO;
         [self.tabsView scrollRectToVisible:frame animated:NO];
     }
     
+#endif
     __block CGFloat newX;
     __block CGRect rect = tabView.frame;
     void (^updateIndicator)() = ^void() {

@@ -20,7 +20,7 @@
 		7CF3D68117CE33EC0021036A /* HostViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CF3D68017CE33EC0021036A /* HostViewController.m */; };
 		7CF3D68217CE35500021036A /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CF3D67117CE332F0021036A /* iPhone.storyboard */; };
 		7CF3D68517CE3F5B0021036A /* ContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CF3D68417CE3F5B0021036A /* ContentViewController.m */; };
-		C825F33D1BD6597C008C1E47 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C825F33C1BD6597C008C1E47 /* Launch.storyboard */; settings = {ASSET_TAGS = (); }; };
+		C825F33D1BD6597C008C1E47 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C825F33C1BD6597C008C1E47 /* Launch.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -304,6 +304,7 @@
 				GCC_PREFIX_HEADER = "CKViewPager/CKViewPager-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/CKViewPager/CKViewPager-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.star.xsb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -317,6 +318,7 @@
 				GCC_PREFIX_HEADER = "CKViewPager/CKViewPager-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/CKViewPager/CKViewPager-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.star.xsb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

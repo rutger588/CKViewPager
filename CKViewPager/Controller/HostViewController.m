@@ -25,18 +25,19 @@
 	self.delegate = self;
 
 	self.title = @"View Pager";
-  self.titlesLabels = [[NSMutableArray alloc] init];
+    self.titlesLabels = [[NSMutableArray alloc] init];
   // Keeps tab bar below navigation bar on iOS 7.0+
 	// if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
 	//     self.edgesForExtendedLayout = UIRectEdgeNone;
 	// }
 
+    
 	self.indicatorColor = [[UIColor redColor] colorWithAlphaComponent:0.64];
 	self.tabsViewBackgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.32];
 	self.contentViewBackgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.32];
-  self.dividerColor = [UIColor blackColor];
+    self.dividerColor = [UIColor blackColor];
 
-  self.startFromSecondTab = NO;
+    self.startFromSecondTab = NO;
 	self.centerCurrentTab = NO;
 	self.tabLocation = ViewPagerTabLocationTop;
 	self.tabHeight = 49;
@@ -44,8 +45,8 @@
 	self.tabWidth = UIInterfaceOrientationIsLandscape(self.interfaceOrientation) ? 128.0f : 96.0f;
 	self.fixFormerTabsPositions = NO;
 	self.fixLatterTabsPositions = NO;
-  self.shouldShowDivider = YES;
-	self.shouldAnimateIndicator = ViewPagerIndicatorAnimationWhileScrolling;
+    self.shouldShowDivider = NO;
+    self.shouldAnimateIndicator = ViewPagerIndicatorAnimationWhileScrolling;
 
 	self.numberOfTabs = 2;
 	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Tab #5" style:UIBarButtonItemStylePlain target:self action:@selector(selectTabWithNumberFive)];
