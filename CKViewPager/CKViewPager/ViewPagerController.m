@@ -354,12 +354,14 @@ static const BOOL kFixLatterTabsPositions = NO;
 	}
 
 	self.didTapOnTabView = !didSwipe;
- 
+   
     /*! 如果用户同时点击TabView以及手势滑动则直接返回*/
     if (self.didTapOnTabView
-        &&  ((UIScrollView *) self.pageViewController.view.subviews[0]).tracking) {
-        return;
-    }
+        &&  (((UIScrollView *)self.pageViewController.view.subviews[0]).decelerating ||
+             ((UIScrollView *) self.pageViewController.view.subviews[0]).tracking ||
+             ((UIScrollView *) self.pageViewController.view.subviews[0]).dragging)) {
+            return;
+        }
     
     
 	self.animatingToTab = YES;
