@@ -74,6 +74,7 @@ static const BOOL kFixLatterTabsPositions = NO;
 @property(nonatomic) BOOL didTapOnTabView;
 @property(nonatomic, strong) UIView *underlineStrokeAlphaKeeper;
 @property(nonatomic, strong) UIView *divider;
+@property (nonatomic,assign) BOOL animatingToUnderLine;
 @end
 
 @implementation ViewPagerController
@@ -137,8 +138,8 @@ static const BOOL kFixLatterTabsPositions = NO;
 
 - (void)layoutSubviews
 {
-    CGFloat topLayoutGuide = self.topLayoutGuide.length;
     
+    CGFloat topLayoutGuide = self.topLayoutGuide.length;
     CGRect frame = self.tabsView.frame;
     frame.origin.x = 0.0;
     frame.origin.y = self.tabLocation == ViewPagerTabLocationTop ? topLayoutGuide : CGRectGetHeight(self.view.frame) - self.tabHeight;
@@ -168,9 +169,9 @@ static const BOOL kFixLatterTabsPositions = NO;
     //if Tap is not selected Tab(new Tab)
     if (self.activeTabIndex != index) {
         // Select the tab
-        self.animatingToTab = YES;
+        /*! self.animatingToTab = YES; */
         [self selectTabAtIndex:index didSwipe:NO];
-        self.animatingToTab = NO;
+        /*! self.animatingToTab = NO; */
     }
 }
 
@@ -244,6 +245,17 @@ static const BOOL kFixLatterTabsPositions = NO;
         frame.size.width = CGRectGetWidth(self.tabsView.frame);
     }
     
+  
+    __block CGRect rect = tabView.frame;
+    [UIView animateWithDuration:0.3f animations:^{
+        rect.origin.y = self.underlineStroke.frame.origin.y;
+        rect.size.height = self.underlineStroke.frame.size.height;
+        self.underlineStroke.frame = rect;
+        self.underlineStrokeAlphaKeeper.frame = rect;
+    } completion:^(BOOL finished) {
+        
+    }];
+  
     [self.tabsView scrollRectToVisible:frame animated:YES];
 }
 
@@ -261,68 +273,15 @@ static const BOOL kFixLatterTabsPositions = NO;
     }
     
     // __weak pageViewController to be used in blocks to prevent retaining strong reference to self
-    __weak UIPageViewController *weakPageViewController = self.pageViewController;
+    //__weak UIPageViewController *weakPageViewController = self.pageViewController;
     __weak ViewPagerController *weakSelf = self;
     
-    
-    
-    if (activeContentIndex == self.activeContentIndex) {
-        
-        [self.pageViewController setViewControllers:@[viewController]
-                                          direction:UIPageViewControllerNavigationDirectionForward
-                                           animated:NO
-                                         completion:^(BOOL completed) {
-                                             weakSelf.animatingToTab = NO;
-                                         }];
-        
-    } else if (!(activeContentIndex + 1 == self.activeContentIndex || activeContentIndex - 1 == self.activeContentIndex)) {
-        
-        [self.pageViewController setViewControllers:@[viewController]
-                                          direction:(activeContentIndex < self.activeContentIndex) ? UIPageViewControllerNavigationDirectionReverse : UIPageViewControllerNavigationDirectionForward
-                                           animated:YES
-                                         completion:^(BOOL completed) {
-                                             
-                                             weakSelf.animatingToTab = NO;
-                                             
-                                             // Set the current page again to obtain synchronisation between tabs and content
-                                             dispatch_async(dispatch_get_main_queue(), ^{
-                                                 [weakPageViewController setViewControllers:@[viewController]
-                                                                                  direction:(activeContentIndex < weakSelf.activeContentIndex) ? UIPageViewControllerNavigationDirectionReverse : UIPageViewControllerNavigationDirectionForward
-                                                                                   animated:NO
-                                                                                 completion:nil];
-                                             });
-                                         }];
-        
-    } else {
-        
-        [self.pageViewController setViewControllers:@[viewController]
-                                          direction:(activeContentIndex < self.activeContentIndex) ? UIPageViewControllerNavigationDirectionReverse : UIPageViewControllerNavigationDirectionForward
-                                           animated:YES
-                                         completion:^(BOOL completed) {
-                                             weakSelf.animatingToTab = NO;
-                                         }];
-    }
-    
-    // Clean out of sight contents
-    NSInteger index;
-    index = self.activeContentIndex - 1;
-    if (index >= 0 &&
-        index != activeContentIndex &&
-        index != activeContentIndex - 1) {
-        self.contents[index] = NSNull.null;
-    }
-    index = self.activeContentIndex;
-    if (index != activeContentIndex - 1 &&
-        index != activeContentIndex &&
-        index != activeContentIndex + 1) {
-        self.contents[index] = [NSNull null];
-    }
-    index = self.activeContentIndex + 1;
-    if (index < self.contents.count &&
-        index != activeContentIndex &&
-        index != activeContentIndex + 1) {
-        self.contents[index] = [NSNull null];
-    }
+    [self.pageViewController setViewControllers:@[viewController]
+                                      direction:UIPageViewControllerNavigationDirectionForward | UIPageViewControllerNavigationDirectionReverse
+                                       animated:YES
+                                     completion:^(BOOL completed) {
+                                         weakSelf.animatingToTab = NO;
+                                     }];
     
     _activeContentIndex = activeContentIndex;
 }
@@ -354,32 +313,25 @@ static const BOOL kFixLatterTabsPositions = NO;
 	}
 
 	self.didTapOnTabView = !didSwipe;
-   
+ 
     /*! 如果用户同时点击TabView以及手势滑动则直接返回*/
     if (self.didTapOnTabView
         &&  (((UIScrollView *)self.pageViewController.view.subviews[0]).decelerating ||
              ((UIScrollView *) self.pageViewController.view.subviews[0]).tracking ||
-             ((UIScrollView *) self.pageViewController.view.subviews[0]).dragging)) {
-            return;
-        }
-    
-    
-	self.animatingToTab = YES;
+              ((UIScrollView *) self.pageViewController.view.subviews[0]).dragging)) {
+        return;
+    }
+
+	self.animatingToTab = NO;
 	// Keep a reference to previousIndex in case it is needed for the delegate
 	NSUInteger previousIndex = self.activeTabIndex;
 
 	// Set activeTabIndex
 	self.activeTabIndex = index;
+    
+    
+    self.activeContentIndex = index;
 
-	// Set activeContentIndex
-    // Add by Yanci
-    // Fix:修复快速滑动引起的内容页不正确BUG
-	self.activeContentIndex = index;
-//    _activeContentIndex = index;
-//    [_pageViewController setViewControllers:@[_contents[index]]
-//                                  direction:UIPageViewControllerNavigationDirectionForward
-//                                   animated:true completion:nil]
-//    ;
     
 	// Inform delegate about the change
 	if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:)]) {
@@ -491,6 +443,7 @@ static const BOOL kFixLatterTabsPositions = NO;
                                                               navigationOrientation:UIPageViewControllerNavigationOrientationHorizontal
                                                                             options:nil];
     
+    
     // Setup some forwarding events to hijack the scrollView
     // Keep a reference to the actual delegate
     self.actualDelegate = ((UIScrollView *) self.pageViewController.view.subviews[0]).delegate;
@@ -500,7 +453,7 @@ static const BOOL kFixLatterTabsPositions = NO;
     self.pageViewController.dataSource = self;
     self.pageViewController.delegate = self;
     
-    self.animatingToTab = YES;
+    self.animatingToTab = NO;
     self.defaultSetupDone = NO;
     self.shouldShowDivider = NO;
 }
@@ -532,13 +485,7 @@ static const BOOL kFixLatterTabsPositions = NO;
         [self.contents addObject:[NSNull null]];
     }
     
-    
-//    // Add by yanci
-//    // Fix: 修复快速滑动引起的内容页不正确BUG
-//    for (NSUInteger i = 0; i < self.tabCount; i++) {
-//        [self viewControllerAtIndex:i];
-//    }
-    
+ 
     // Add tabsView
     self.tabsView = (UIScrollView *) [self.view viewWithTag:kTabViewTag];
     
@@ -552,6 +499,12 @@ static const BOOL kFixLatterTabsPositions = NO;
         self.tabsView.showsVerticalScrollIndicator = NO;
         self.tabsView.bounces = NO;
         self.tabsView.tag = kTabViewTag;
+        self.tabsView.layer.shadowOpacity = 0.8;//阴影透明度，默认0
+        self.tabsView.layer.shadowOffset = CGSizeMake(0,3);
+        CGPathRef path = CGPathCreateWithRect(CGRectMake(0, self.tabsView.frame.size.height-5, self.tabsView.frame.size.width, 0.5), NULL);
+        self.tabsView.layer.shadowPath = path;
+        self.tabsView.layer.shadowColor = [UIColor blackColor].CGColor;
+        self.tabsView.clipsToBounds = false;
         
         [self.view insertSubview:self.tabsView atIndex:0];
         
@@ -600,6 +553,7 @@ static const BOOL kFixLatterTabsPositions = NO;
         // To capture tap events
         UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
         [tabView addGestureRecognizer:tapGestureRecognizer];
+        tapGestureRecognizer.delegate = self;
     }
     
     // Extend contentSizeWidth if fixLatterTabsPositions is provided YES
@@ -741,19 +695,20 @@ static const BOOL kFixLatterTabsPositions = NO;
 
 #pragma mark - UIPageViewControllerDelegate
 
-
 - (void)pageViewController:(UIPageViewController *)pageViewController didFinishAnimating:(BOOL)finished previousViewControllers:(NSArray *)previousViewControllers transitionCompleted:(BOOL)completed
 {
-    
+  
+    /*! If not complete setting tab, it will conflict with the scrollviewdidscroll */
     if (!completed) {
         return;
     }
-    
+  
     UIViewController *viewController = self.pageViewController.viewControllers[0];
     
     // Select tab
     NSUInteger index = [self indexForViewController:viewController];
     [self selectTabAtIndex:index didSwipe:YES];
+ 
 }
 
 
@@ -765,73 +720,7 @@ static const BOOL kFixLatterTabsPositions = NO;
     if ([self.actualDelegate respondsToSelector:@selector(scrollViewDidScroll:)]) {
         [self.actualDelegate scrollViewDidScroll:scrollView];
     }
-    UIView *tabView = [self tabViewAtIndex:self.activeTabIndex];
-    
- 
-    if ([self isAnimatingToTab]) {
-        
-        // Get the related tab view position
-        CGRect frame = tabView.frame;
-        CGFloat movedRatio = (scrollView.contentOffset.x / CGRectGetWidth(scrollView.frame)) - 1;
-        frame.origin.x += movedRatio * CGRectGetWidth(frame);
-        
-        if (self.centerCurrentTab) {
-            
-            frame.origin.x += (frame.size.width / 2);
-            frame.origin.x -= CGRectGetWidth(self.tabsView.frame) / 2;
-            frame.size.width = CGRectGetWidth(self.tabsView.frame);
-            
-            if (frame.origin.x < 0) {
-                frame.origin.x = 0;
-            }
-            
-            if ((frame.origin.x + frame.size.width) > self.tabsView.contentSize.width) {
-                frame.origin.x = (self.tabsView.contentSize.width - CGRectGetWidth(self.tabsView.frame));
-            }
-        } else {
-            
-            frame.origin.x -= self.tabOffset;
-            frame.size.width = CGRectGetWidth(self.tabsView.frame);
-        }
-        
-        [self.tabsView scrollRectToVisible:frame animated:NO];
-    }
-    
- 
-    __block CGFloat newX;
-    __block CGRect rect = tabView.frame;
-    void (^updateIndicator)() = ^void() {
-        rect.origin.x = newX;
-        rect.origin.y = self.underlineStroke.frame.origin.y;
-        rect.size.height = self.underlineStroke.frame.size.height;
-        self.underlineStroke.frame = rect;
-        self.underlineStrokeAlphaKeeper.frame = rect;
-    };
-    
-    CGFloat width = CGRectGetWidth(self.view.frame);
-    CGFloat distance = tabView.frame.size.width + self.padding;
-    
-    if (self.shouldAnimateIndicator == ViewPagerIndicatorAnimationWhileScrolling && !self.didTapOnTabView) {
-        newX = [self animateWhileScroll:scrollView rect:&rect width:width distance:distance];
-        if (newX != NSNotFound) {
-            updateIndicator();
-        }
-    } else if (self.shouldAnimateIndicator == ViewPagerIndicatorAnimationNone) {
-        newX = tabView.frame.origin.x;
-        updateIndicator();
-    } else if (self.shouldAnimateIndicator == ViewPagerIndicatorAnimationEnd || self.didTapOnTabView) {
-        newX = tabView.frame.origin.x;
-        [UIView animateWithDuration:.35f animations:^{
-            updateIndicator();
-        }];
-    } else {
-        newX = [self animateWhileScroll:scrollView rect:&rect width:width distance:distance];
-        if (newX != NSNotFound) {
-            updateIndicator();
-        }
-    }
 }
-
 
 - (CGFloat)animateWhileScroll:(UIScrollView *)scrollView rect:(CGRect *)rect width:(CGFloat)width distance:(CGFloat)distance
 {
@@ -907,6 +796,8 @@ static const BOOL kFixLatterTabsPositions = NO;
     if ([self.actualDelegate respondsToSelector:@selector(scrollViewDidEndDecelerating:)]) {
         [self.actualDelegate scrollViewDidEndDecelerating:scrollView];
     }
+    
+    
     self.didTapOnTabView = NO;
 }
 
@@ -957,6 +848,7 @@ static const BOOL kFixLatterTabsPositions = NO;
     }
     self.didTapOnTabView = NO;
 }
+
 
 @end
 
