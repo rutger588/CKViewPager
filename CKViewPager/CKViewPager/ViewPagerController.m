@@ -276,8 +276,11 @@ static const BOOL kFixLatterTabsPositions = NO;
     //__weak UIPageViewController *weakPageViewController = self.pageViewController;
     __weak ViewPagerController *weakSelf = self;
     
+    // Determine the scrol direction
+    NSUInteger direction = self.activeContentIndex == 0 ? UIPageViewControllerNavigationDirectionForward : self.activeContentIndex < activeContentIndex ? UIPageViewControllerNavigationDirectionForward : UIPageViewControllerNavigationDirectionReverse;
+    
     [self.pageViewController setViewControllers:@[viewController]
-                                      direction:UIPageViewControllerNavigationDirectionForward | UIPageViewControllerNavigationDirectionReverse
+                                      direction:direction
                                        animated:YES
                                      completion:^(BOOL completed) {
                                          weakSelf.animatingToTab = NO;
