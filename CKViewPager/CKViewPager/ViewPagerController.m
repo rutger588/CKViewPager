@@ -502,10 +502,8 @@ static const BOOL kFixLatterTabsPositions = NO;
         self.tabsView.showsVerticalScrollIndicator = NO;
         self.tabsView.bounces = NO;
         self.tabsView.tag = kTabViewTag;
-        self.tabsView.layer.shadowOpacity = 0.8;//阴影透明度，默认0
-        self.tabsView.layer.shadowOffset = CGSizeMake(0,3);
-        CGPathRef path = CGPathCreateWithRect(CGRectMake(0, self.tabsView.frame.size.height-5, self.tabsView.frame.size.width, 0.5), NULL);
-        self.tabsView.layer.shadowPath = path;
+        self.tabsView.layer.shadowOpacity = 0.3;
+        self.tabsView.layer.shadowOffset = CGSizeMake(0,0);
         self.tabsView.layer.shadowColor = [UIColor blackColor].CGColor;
         self.tabsView.clipsToBounds = false;
         
