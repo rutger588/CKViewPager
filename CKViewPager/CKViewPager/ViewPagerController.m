@@ -503,7 +503,8 @@ static const BOOL kFixLatterTabsPositions = NO;
         self.tabsView.bounces = NO;
         self.tabsView.tag = kTabViewTag;
         self.tabsView.layer.shadowOpacity = 0.3;
-        self.tabsView.layer.shadowOffset = CGSizeMake(0,0);
+        self.tabsView.layer.shadowOffset = CGSizeMake(0,1.5);
+        self.tabsView.layer.shadowRadius = 1.5;
         self.tabsView.layer.shadowColor = [UIColor blackColor].CGColor;
         self.tabsView.clipsToBounds = false;
         
